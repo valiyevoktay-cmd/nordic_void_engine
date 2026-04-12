@@ -1,0 +1,16 @@
+# Python Environment & Cache
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.env
+
+# Raw Data & Binaries (Data Ethics Compliance)
+data/raw/*.bi5
+data/raw/*.csv
+*.bi5
+
+# OS Generated Files
+.DS_Store
+Thumbs.db
