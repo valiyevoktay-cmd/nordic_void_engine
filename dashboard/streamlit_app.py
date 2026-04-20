@@ -12,8 +12,33 @@ sys.path.append(str(project_root))
 from src.pipeline import Bi5Parser
 from src.engine import MicrostructureEngine
 
-# --- 0. Global Event Registry (N=33) ---
+# --- 0. Global Event Registry (Expanded N=69) ---
 RIKSBANK_EVENTS = [
+    # --- 2014 ---
+    pd.Timestamp("2014-02-13 08:30:00"), pd.Timestamp("2014-04-09 07:30:00"),
+    pd.Timestamp("2014-07-03 07:30:00"), pd.Timestamp("2014-09-04 07:30:00"),
+    pd.Timestamp("2014-10-28 08:30:00"), pd.Timestamp("2014-12-16 08:30:00"),
+    # --- 2015 ---
+    pd.Timestamp("2015-02-12 08:30:00"), pd.Timestamp("2015-04-29 07:30:00"),
+    pd.Timestamp("2015-07-02 07:30:00"), pd.Timestamp("2015-09-03 07:30:00"),
+    pd.Timestamp("2015-10-28 08:30:00"), pd.Timestamp("2015-12-15 08:30:00"),
+    # --- 2016 ---
+    pd.Timestamp("2016-02-11 08:30:00"), pd.Timestamp("2016-04-21 07:30:00"),
+    pd.Timestamp("2016-07-06 07:30:00"), pd.Timestamp("2016-09-07 07:30:00"),
+    pd.Timestamp("2016-10-27 08:30:00"), pd.Timestamp("2016-12-21 08:30:00"),
+    # --- 2017 ---
+    pd.Timestamp("2017-02-15 08:30:00"), pd.Timestamp("2017-04-27 07:30:00"),
+    pd.Timestamp("2017-07-04 07:30:00"), pd.Timestamp("2017-09-07 07:30:00"),
+    pd.Timestamp("2017-10-26 08:30:00"), pd.Timestamp("2017-12-20 08:30:00"),
+    # --- 2018 ---
+    pd.Timestamp("2018-02-14 08:30:00"), pd.Timestamp("2018-04-26 07:30:00"),
+    pd.Timestamp("2018-07-03 07:30:00"), pd.Timestamp("2018-09-06 07:30:00"),
+    pd.Timestamp("2018-10-24 08:30:00"), pd.Timestamp("2018-12-20 08:30:00"),
+    # --- 2019 ---
+    pd.Timestamp("2019-02-13 08:30:00"), pd.Timestamp("2019-04-25 07:30:00"),
+    pd.Timestamp("2019-07-03 07:30:00"), pd.Timestamp("2019-09-05 07:30:00"),
+    pd.Timestamp("2019-10-24 08:30:00"), pd.Timestamp("2019-12-19 08:30:00"),
+    # --- Original 2020-2026 ---
     pd.Timestamp("2020-11-26 08:30:00"), pd.Timestamp("2021-02-10 08:30:00"),
     pd.Timestamp("2021-04-27 07:30:00"), pd.Timestamp("2021-07-01 07:30:00"),
     pd.Timestamp("2021-09-21 07:30:00"), pd.Timestamp("2021-11-25 08:30:00"),
@@ -139,7 +164,8 @@ def run_aggregate_study(z_val, win_val):
 st.markdown("<h1>NORDIC VOID | Quantitative Research Environment</h1>", unsafe_allow_html=True)
 st.markdown('<div class="academic-meta">High-Frequency Econometrics & Market Microstructure | JEL Codes: E52, G14 | Asset: EUR/SEK</div>', unsafe_allow_html=True)
 
-tab1, tab2 = st.tabs(["📉 Single Event Analysis", "📊 Multi-Event Aggregator (N=33)"])
+# Tabs are now dynamically scaling their title based on the length of RIKSBANK_EVENTS
+tab1, tab2 = st.tabs(["📉 Single Event Analysis", f"📊 Multi-Event Aggregator (N={len(RIKSBANK_EVENTS)})"])
 
 with tab1:
     with st.spinner("Decoding Level-2 Order Book..."):
@@ -178,15 +204,51 @@ with tab1:
 
 with tab2:
     st.markdown("### Multi-Event Statistical Proof")
-    with st.spinner("Processing N=33 study..."):
+    
+    # --- NEW: Dynamic Regime Filter ---
+    regime_filter = st.radio(
+        "Filter by Macroeconomic Regime:",
+        options=[
+            "All History (2014-2026)", 
+            "Regime A: NIRP / ZIRP Era (2014-2019)", 
+            "Regime B: Pandemic & Early Shock (2020-2021)",
+            "Regime C: High-Inflation (2022-2024)",
+            "Regime D: Normalization (2025-2026)"
+        ],
+        horizontal=True
+    )
+
+    with st.spinner(f"Processing N={len(RIKSBANK_EVENTS)} study..."):
         results_df, total_events, missing = run_aggregate_study(z_thresh, window_sec)
         
     if not results_df.empty:
-        detected_df = results_df[results_df["Detected"] == True]
-        hit_rate = (len(detected_df) / total_events) * 100
-        c1, c2, c3, c4 = st.columns(4)
-        c1.metric("Processed Events", f"{len(results_df)} / {total_events}")
-        c2.metric("Vacuum Hit Rate", f"{hit_rate:.1f}%")
-        c3.metric("Mean Withdrawal (Δt)", f"{detected_df['Δt (sec)'].mean():.2f} s" if not detected_df.empty else "N/A")
-        c4.metric("Mean Penalty", f"{detected_df['Penalty (BPS)'].mean():.2f} BPS" if not detected_df.empty else "N/A", delta="Avg Tax", delta_color="inverse")
-        st.dataframe(results_df, use_container_width=True, hide_index=True)
+        # --- NEW: Apply Filter Logic ---
+        temp_df = results_df.copy()
+        temp_df['Year'] = pd.to_datetime(temp_df['Date']).dt.year
+        
+        if "2014-2019" in regime_filter:
+            filtered_df = temp_df[temp_df['Year'] <= 2019].drop(columns=['Year'])
+        elif "2020-2021" in regime_filter:
+            filtered_df = temp_df[(temp_df['Year'] >= 2020) & (temp_df['Year'] <= 2021)].drop(columns=['Year'])
+        elif "2022-2024" in regime_filter:
+            filtered_df = temp_df[(temp_df['Year'] >= 2022) & (temp_df['Year'] <= 2024)].drop(columns=['Year'])
+        elif "2025-2026" in regime_filter:
+            filtered_df = temp_df[temp_df['Year'] >= 2025].drop(columns=['Year'])
+        else:
+            filtered_df = temp_df.drop(columns=['Year'])
+            
+        current_events_count = len(filtered_df)
+
+        if current_events_count > 0:
+            detected_df = filtered_df[filtered_df["Detected"] == True]
+            hit_rate = (len(detected_df) / current_events_count) * 100
+            
+            c1, c2, c3, c4 = st.columns(4)
+            c1.metric("Processed Events", f"{current_events_count} / {total_events}")
+            c2.metric("Vacuum Hit Rate", f"{hit_rate:.1f}%")
+            c3.metric("Mean Withdrawal (Δt)", f"{detected_df['Δt (sec)'].mean():.2f} s" if not detected_df.empty else "N/A")
+            c4.metric("Mean Penalty", f"{detected_df['Penalty (BPS)'].mean():.2f} BPS" if not detected_df.empty else "N/A", delta="Avg Tax", delta_color="inverse")
+            
+            st.dataframe(filtered_df, use_container_width=True, hide_index=True)
+        else:
+            st.warning("No data available for the selected regime.")
