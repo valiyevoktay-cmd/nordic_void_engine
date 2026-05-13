@@ -1,16 +1,53 @@
-# Python Environment & Cache
+# --- Node.js & Frontend (CRITICAL FIX) ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# --- Python Environment & Cache ---
 __pycache__/
 *.py[cod]
 *$py.class
-venv/
+*.so
+.Python
 env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
 .env
+.tox/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
 
-# Raw Data & Binaries (Data Ethics Compliance)
+# --- Raw Data & Binaries (Data Ethics & GitHub Limits) ---
+# Игнорируем тяжелые бинарные тики и локальные выгрузки
 data/raw/*.bi5
 data/raw/*.csv
+data/raw_nok/*.bi5
 *.bi5
+*.csv
+!final_regression_input.csv  # Исключение: этот файл можно оставить, если он нужен для репликации
 
-# OS Generated Files
+# --- IDE & Jupyter Notebooks ---
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# --- OS Generated Files ---
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
