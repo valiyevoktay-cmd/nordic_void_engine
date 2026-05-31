@@ -42,7 +42,7 @@ The analytical core integrates Bayesian Markov Chain Monte Carlo (MCMC) methods 
 
 If utilizing this infrastructure for research, please cite the primary study:
 
-> Valiyev, O. (2026). *The Riksbank Liquidity Vacuum: High-Frequency Evidence of Monetary Policy Transmission Friction*.
+> [Valiyev, O. (2026). *The Riksbank Liquidity Vacuum: High-Frequency Evidence of Monetary Policy Transmission Friction*.](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6771542)
 
 ## License
 
